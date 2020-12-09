@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Account {
@@ -6,7 +7,6 @@ public class Account {
     private boolean status;
     private int membershipPrice;
     private int membershipLenght;
-
 
     public void bliMedlem() {
         Scanner userInput = new Scanner(System.in);
