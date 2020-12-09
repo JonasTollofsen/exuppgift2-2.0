@@ -2,33 +2,35 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Account {
-    private String accountPassword;
-    private String personNummer;
+
+    private static ArrayList<String> personnummerList = new ArrayList<String>();
+    private static ArrayList<String> passwordList = new ArrayList<String>();
+
     private boolean status;
+    private String currentlyLoggedIn;
     private int membershipPrice;
     private int membershipLenght;
 
-    public void bliMedlem() {
+    public void bliMedlem() throws Exception {
         Scanner userInput = new Scanner(System.in);
-        String personnummerAttempt;
+        String requestedPersonnummer;
         boolean personnummerControl;
 
-        if (this.getStatus()) {
-            System.out.println("Du är redan medlem");
-        } else {
             do {
-                System.out.println("Vänligen ange personnummer in följande format ÅÅMMDD-XXXX: ");
-                personnummerAttempt = userInput.nextLine();
-                personnummerControl = luhnAlgorithm(personnummerAttempt);
-                if (personnummerControl == false) {
-                    System.out.println("Felaktigt personnummer, vänligen försök igen");
-                } else {
-                    this.setPersonNummer(personnummerAttempt);
-                }
-            }
-            while (personnummerControl == false);
+                System.out.println("Vänligen ange personnummer i följande format ÅÅMMDD-XXXX: ");
+                requestedPersonnummer = userInput.nextLine();
+                    personnummerControl = luhnAlgorithm(requestedPersonnummer);
+                    if (!personnummerControl) {
+                        System.out.println("Felaktigt personnummer, vänligen försök igen");
+                    }
+                } while (!personnummerControl);
+
+                if (personnummerCheck(requestedPersonnummer)) {
+                    throw new Exception();
+                } else personnummerList.add(requestedPersonnummer);
+
             System.out.println("Vänligen ange lösenord: ");
-            this.setAccountPassword(userInput.next());
+            passwordList.add(requestedPersonnummer + userInput.nextLine());
 
             System.out.println("");
             System.out.println("PRISLISTA:");
@@ -37,8 +39,7 @@ public class Account {
             System.out.println("3-6 månader – 350 SEK/månad");
             System.out.println("7-12 månader – 300 SEK/månad");
             System.out.println("Längre än 12 månader – 250 SEK/månad");
-
-            System.out.println("");
+            System.out.println();
 
             System.out.println("Hur många månader vill du vara medlem: ");
             this.membershipLenght = userInput.nextInt();
@@ -49,6 +50,10 @@ public class Account {
             System.out.println("Välkommen som medlem!");
         }
 
+    public boolean personnummerCheck(String username) {
+        if (personnummerList.contains(username)) {
+            return true;
+        } else return false;
     }
 
     public int calcMembership(int months) {
@@ -86,8 +91,10 @@ public class Account {
             personnummerAttempt = userInput.next();
             System.out.println("Lösenord: ");
             passwordAttempt = userInput.next();
-            if (personnummerAttempt.equals(this.getPersonNummer()) && (passwordAttempt.equals(this.getAccountPassword()))) {
-                this.setStatus(true);
+
+            passwordAttempt = personnummerAttempt + passwordAttempt;
+            if (personnummerList.contains(personnummerAttempt) && passwordList.contains(passwordAttempt)){
+                this.setStatus(true, personnummerAttempt);
                 System.out.println("Välkommen!");
             } else {
                 System.out.println("Fel inloggning!");
@@ -95,11 +102,14 @@ public class Account {
         }
     }
 
+    public void loggaut() {
+        setStatus(false, "NULL");
+        System.out.println("Du är utloggad");
+    }
+
     public void bokaPass() {
         if (this.getStatus()) {
             System.out.println("Boka pass här..");
-
-
         } else {
             System.out.println("Du måste logga in först");
         }
@@ -147,13 +157,14 @@ public class Account {
                 tmp = tmp / 10;
             }
         }
-        sum = sum / 10; //Sum blir dividerat med 10 och lagrat i variabeln (Sum)
+        double sumWithDecimal;
+        sumWithDecimal = (double)sum / 10; //Sum blir dividerat med 10 och lagrat i variabeln (Sum)
 
         /*
         if-villkor för att kolla så att värdet av sum-variabeln inte är noll, då detta skulle ge result = true,
         Exempelvis skulle användaren kunna ange 000000-0000 som ett äkta personnummer utan nedan if-villkor.
         */
-        if (sum == 0){
+        if (sumWithDecimal == 0){
             result = false;
             return result;
         }
@@ -163,7 +174,7 @@ public class Account {
         "floor" i klassen "Math" (Math.floor). Sammafattat kollar detta efter att sum = ett heltal.
         */
 
-        if (sum == Math.floor(sum)) {
+        if (sumWithDecimal == Math.floor(sumWithDecimal)) {
             result = true;
         } else result = false;
         return result;
@@ -179,11 +190,12 @@ public class Account {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(boolean status, String currentlyLoggedIn) {
         this.status = status;
+        this.currentlyLoggedIn = currentlyLoggedIn;
     }
 
-    public String getPersonNummer() {
+    /*public String getPersonNummer() {
         return personNummer;
     }
 
@@ -198,5 +210,5 @@ public class Account {
 
     public String getAccountPassword() {
         return accountPassword;
-    }
+    }*/
 }
